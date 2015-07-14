@@ -9,13 +9,40 @@ using System.Web.Mvc;
 using System.Web.UI.WebControls;
 
 using MvcMusicStore.Models;
+using Nest;
+using System.Configuration;
 
 namespace MvcMusicStore.Controllers
 {
-    [Authorize(Roles = "Administrator")]
+    //[Authorize(Roles = "Administrator")]
     public class StoreManagerController : Controller
     {
         private MusicStoreEntities db = new MusicStoreEntities();
+
+        /// <summary>
+        /// (re-)Index Albums
+        /// </summary>
+        /// <referenceUrl>https://www.elastic.co/guide/en/elasticsearch/client/net-api/current/_nest.html</referenceUrl>
+        /// <returns></returns>
+        public ActionResult ReIndex()
+        {
+            var node = new Uri(ConfigurationManager.AppSettings["ElasticSearchUrl"] ?? "http://localhost:9200");
+            var esIndex = ConfigurationManager.AppSettings["ESDefaultIndex"] ?? "musicstore";
+            //var settings = new ConnectionSettings("localhost", 9200);            
+            //var settings = new ConnectionSettings(node, defaultIndex: esIndex);
+            var settings = new ConnectionSettings(node);                        
+            settings.SetDefaultIndex(esIndex);
+            var client = new ElasticClient(settings);
+
+            foreach (var album in db.Albums)
+            {
+                //client.Index(album, "musicstore", "albums", album.AlbumId);   // outdated
+                //client.Index(album, i => i.Id(album.AlbumId))
+                client.Index(album);    // ES will infer the
+            }
+
+            return RedirectToAction("Index");
+        }
 
         //
         // GET: /StoreManager/

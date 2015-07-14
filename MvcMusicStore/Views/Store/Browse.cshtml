@@ -10,9 +10,11 @@
     <ul id="album-list">
         @foreach (var album in Model.Albums)
         {
+            var hoverTitle = "Artist: " + album.Artist.Name + "\nTitle:  " + album.Title + "\nGenre:  " + album.Genre.Name + " (" + album.Genre.GenreId + ")" + "\nPrice:  $" + album.Price;
+            
             <li>
                 <a href="@Url.Action("Details", new { id = album.AlbumId })">
-                    <img alt="@album.Title" src="@album.AlbumArtUrl" />
+                    <img alt="@album.Title" src="@album.AlbumArtUrl" title="@hoverTitle"  />
                     <span>@album.Title</span>
                 </a>
             </li>
